@@ -30,9 +30,10 @@ try:
     openai_key = os.getenv("OPENAI_API_KEY")
 
     if github_token:
+        github_base_url = os.getenv("GITHUB_OPENAI_API_BASE_URL", "https://models.inference.ai.azure.com")
         client = openai.OpenAI(
             api_key=github_token,
-            base_url="https://models.inference.ai.azure.com"
+            base_url=github_base_url
         )
     elif openai_key:
         client = openai.OpenAI(api_key=openai_key)
@@ -42,6 +43,21 @@ try:
 except Exception as e:
     print(e)
     print("Could not load OpenAI API key.")
+
+try:
+    import openai as _openai
+    deepseek_key = os.getenv("DEEPSEEK_API_KEY")
+    deepseek_base_url = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
+    if not deepseek_key:
+        raise ValueError("No API key found. Set DEEPSEEK_API_KEY in .env")
+    deepseek_client = _openai.OpenAI(
+        api_key=deepseek_key,
+        base_url=deepseek_base_url
+    )
+except Exception as e:
+    print(e)
+    print("Could not load DeepSeek API key.")
+    deepseek_client = None
 
 
 def log_to_file(log_file, prompt, completion, model, max_tokens_to_sample):
@@ -96,8 +112,9 @@ def complete_text_claude(prompt, stop_sequences=[anthropic.HUMAN_PROMPT], model=
     return completion
 
 
-def complete_text_openai(prompt, stop_sequences=[], model="gpt-4o-mini", max_tokens_to_sample=1000, temperature=0.5, log_file=None, **kwargs):
-    """ Call the OpenAI API to complete a prompt."""
+def complete_text_openai(prompt, stop_sequences=[], model="gpt-4o-mini", max_tokens_to_sample=1000, temperature=0.5, log_file=None, _client=None, **kwargs):
+    """ Call the OpenAI-compatible API to complete a prompt."""
+    _client = _client or client
     raw_request = {
         "model": model,
         "temperature": temperature,
@@ -111,7 +128,7 @@ def complete_text_openai(prompt, stop_sequences=[], model="gpt-4o-mini", max_tok
     while iteration < 10:
         try:
             messages = [{"role": "user", "content": prompt}]
-            response = client.chat.completions.create(messages=messages, **raw_request)
+            response = _client.chat.completions.create(messages=messages, **raw_request)
             completion = response.choices[0].message.content
             break
         except Exception as e:
@@ -142,6 +159,8 @@ def complete_text(prompt, log_file, model, **kwargs):
     """ Complete text using the specified model with appropriate API. """
     if model.startswith("claude"):
         completion = complete_text_claude(prompt, stop_sequences=[anthropic.HUMAN_PROMPT, "Observation:"], log_file=log_file, model=model, **kwargs)
+    elif model.lower().startswith("deepseek"):
+        completion = complete_text_openai(prompt, stop_sequences=["Observation:"], log_file=log_file, model=model, _client=deepseek_client, **kwargs)
     else:
         completion = complete_text_openai(prompt, stop_sequences=["Observation:"], log_file=log_file, model=model, **kwargs)
     return completion

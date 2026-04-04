@@ -245,7 +245,7 @@ Now please edit this script according to the following instructions:
 ```instruction
 {plan}
 ```
-Note that you should provide the **full** code after the edit, making no other changes. Please ensure the completeness of the codes so that it can be run without additional modifications. Your codes will be executed with the support of a NVIDIA GPU card with 24 GB memory. 
+Note that you should provide the **full** code after the edit, making no other changes. Please ensure the completeness of the codes so that it can be run without additional modifications. Your codes will be executed on a **Linux machine** with a NVIDIA GPU card (16GB VRAM).
 IMPORTANT: Do NOT import AdamW from transformers (it was removed). Use `from torch.optim import AdamW` instead.
 Please response exactly in the following format:
 ```python

@@ -53,9 +53,10 @@ if __name__ == "__main__":
     # general agent configs
     parser.add_argument("--agent-type", type=str, default="DSAgent", help="agent type")
     parser.add_argument("--llm-name", type=str, default="gpt-4o-mini", help="llm name")
-    parser.add_argument("--fast-llm-name", type=str, default="gpt-4o-mini", help="llm name")
-    parser.add_argument("--edit-script-llm-name", type=str, default="gpt-4o-mini", help="llm name")
+    parser.add_argument("--fast-llm-name", type=str, default=None, help="llm name for helper/summary tasks (defaults to --llm-name)")
+    parser.add_argument("--edit-script-llm-name", type=str, default=None, help="llm name for code editing (defaults to --llm-name)")
     parser.add_argument("--edit-script-llm-max-tokens", type=int, default=4000, help="llm max tokens")
+    parser.add_argument("--ranking-model", type=str, default=None, help="llm name for CBR case ranking (defaults to --llm-name)")
     parser.add_argument("--agent-max-steps", type=int, default=50, help="max iterations for agent")
 
     # research agent configs
@@ -75,10 +76,11 @@ if __name__ == "__main__":
     args.work_dir = args.work_dir + f"/{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
     LLM.STATISTICAL_DIR = args.log_dir
 
-    # CHANGED: only set RANKING_MODEL and import retrieval if retrieval is actually enabled
-    if not args.no_retrieval:
-        from MLAgentBench import retrieval
-        retrieval.RANKING_MODEL = args.llm_name
+    # Default helper/ranking/edit models to brain model if not explicitly specified
+    args.fast_llm_name = args.fast_llm_name or args.llm_name
+    args.edit_script_llm_name = args.edit_script_llm_name or args.llm_name
+    from MLAgentBench import retrieval
+    retrieval.RANKING_MODEL = args.ranking_model or args.fast_llm_name
 
     if args.no_retrieval or args.agent_type != "ResearchAgent":
         args.actions_remove_from_prompt.extend(["Retrieval from Research Log", "Append Summary to Research Log", "Reflection"])

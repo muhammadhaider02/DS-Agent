@@ -28,15 +28,14 @@ Then, please install neccessary libraries in the requirements.
 pip install -r requirements.txt
 ```
 
-Since DS-Agent mainly utilizes GPT-3.5 and GPT-4 for all the experiments, please fill in the openai key in development/MLAgentBench/LLM.py and deployment/generate.py
-
 ## Development Stage
 
+Since DS-Agent mainly utilizes DeepSeek for the experiment, please fill in the deepseek key in .env.
 Run DS-Agent for development tasks with the following command:
 
 ```shell
 cd development/MLAgentBench
-python runner.py --task feedback --llm-name gpt-3.5-turbo-16k --edit-script-llm-name gpt-3.5-turbo-16k
+python runner.py --task feedback --llm-name deepseek-reasoner --edit-script-llm-name deepseek-chat --fast-llm-name deepseek-chat --ranking-model deepseek-chat
 ```
 
 During execution, logs and intermediate solution files will be saved in logs/ and workspace/. 
