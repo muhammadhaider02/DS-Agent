@@ -11,6 +11,7 @@ import copy
 import time
 import fnmatch
 import signal
+import threading
 import traceback
 from traceback import format_exception
 from multiprocessing import active_children
@@ -246,14 +247,19 @@ class Environment:
         return trace
     
     def __enter__(self):
-        # set time out
-        def signal_handler(signum, frame):
+        # set time out (cross-platform using threading.Timer)
+        def _timeout_handler():
             raise TimeoutException("Timed out!")
-        signal.signal(signal.SIGALRM, signal_handler)
-        signal.alarm(self.args.max_time)
+        self._timeout_timer = threading.Timer(self.args.max_time, _timeout_handler)
+        self._timeout_timer.daemon = True
+        self._timeout_timer.start()
         return self
     
-    def __exit__(self, exc_type, exc_value, traceback):  
+    def __exit__(self, exc_type, exc_value, traceback):
+        # cancel the timeout timer
+        if hasattr(self, '_timeout_timer'):
+            self._timeout_timer.cancel()
+
         # save error message
         active = active_children()
         print(f'Active Children: {len(active)}')
@@ -266,7 +272,7 @@ class Environment:
         # report active children
         active = active_children()
         print(f'Active Children: {len(active)}')
-            
+
         if traceback is not None:
             print("Error message saved in error.txt")
             open(os.path.join(self.log_dir, "error.txt"), "w").write(''.join(format_exception(exc_type, exc_value, traceback)))

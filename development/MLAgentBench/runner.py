@@ -6,14 +6,13 @@ import argparse
 import sys
 import datetime
 from MLAgentBench import LLM
-from MLAgentBench import retrieval
 from MLAgentBench.environment import Environment
 from MLAgentBench.agents.agent import Agent, SimpleActionAgent, ReasoningActionAgent
 from MLAgentBench.agents.agent_research import ResearchAgent
 from MLAgentBench.agents.dsagent import DSAgent
 from MLAgentBench import high_level_actions
 try:
-    from MLAgentBench.agents.agent_autogpt  import AutoGPTAgent
+    from MLAgentBench.agents.agent_autogpt import AutoGPTAgent
 except:
     print("Failed to import AutoGPTAgent; Make sure you have installed the autogpt dependencies if you want to use it.")
 
@@ -28,7 +27,7 @@ def run(agent_cls, args):
         print("Lower level actions enabled: ", [action.name for action in env.low_level_actions])
         print("High level actions enabled: ", [action.name for action in env.high_level_actions])
         print("Read only files: ", env.read_only_files, file=sys.stderr)
-        print("=====================================")  
+        print("=====================================")
 
         agent = agent_cls(args, env)
         final_message = agent.run(env)
@@ -38,14 +37,13 @@ def run(agent_cls, args):
     env.save("final")
 
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, default="feedback", help="task name")
     parser.add_argument("--log-dir", type=str, default="./logs", help="log dir")
     parser.add_argument("--work-dir", type=str, default="./workspace", help="work dir")
     parser.add_argument("--max-steps", type=int, default=30, help="number of steps")
-    parser.add_argument("--max-time", type=int, default=5* 60 * 60, help="max time")
+    parser.add_argument("--max-time", type=int, default=5 * 60 * 60, help="max time")
     parser.add_argument("--device", type=int, default=0, help="device id")
     parser.add_argument("--python", type=str, default="python", help="python command")
     parser.add_argument("--interactive", action="store_true", help="interactive mode")
@@ -54,16 +52,16 @@ if __name__ == "__main__":
 
     # general agent configs
     parser.add_argument("--agent-type", type=str, default="DSAgent", help="agent type")
-    parser.add_argument("--llm-name", type=str, default="gpt-3.5-turbo-16k", help="llm name")
-    parser.add_argument("--fast-llm-name", type=str, default="gpt-3.5-turbo-16k", help="llm name")
-    parser.add_argument("--edit-script-llm-name", type=str, default="gpt-3.5-turbo-16k", help="llm name")
+    parser.add_argument("--llm-name", type=str, default="gpt-4o-mini", help="llm name")
+    parser.add_argument("--fast-llm-name", type=str, default="gpt-4o-mini", help="llm name")
+    parser.add_argument("--edit-script-llm-name", type=str, default="gpt-4o-mini", help="llm name")
     parser.add_argument("--edit-script-llm-max-tokens", type=int, default=4000, help="llm max tokens")
     parser.add_argument("--agent-max-steps", type=int, default=50, help="max iterations for agent")
 
     # research agent configs
     parser.add_argument("--actions-remove-from-prompt", type=str, nargs='+', default=["Execute Script", "Edit Script (AI)", "Reflection", "List Files", "Copy File", "Undo Edit Script", "Inspect Script Lines"])
     parser.add_argument("--actions-add-to-prompt", type=str, nargs='+', default=[], help="actions to add")
-    parser.add_argument("--no-retrieval", default=True)        # w/ or w/o retrieval
+    parser.add_argument("--no-retrieval", default=True)
     parser.add_argument("--valid-format-entires", type=str, nargs='+', default=None, help="valid format entries")
     parser.add_argument("--max-steps-in-context", type=int, default=3, help="max steps in context")
     parser.add_argument("--max-observation-steps-in-context", type=int, default=3, help="max observation steps in context")
@@ -76,13 +74,17 @@ if __name__ == "__main__":
     args.log_dir = args.log_dir + f"/{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
     args.work_dir = args.work_dir + f"/{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
     LLM.STATISTICAL_DIR = args.log_dir
-    retrieval.RANKING_MODEL = args.llm_name
-    
-    print(args, file=sys.stderr)
-    
+
+    # CHANGED: only set RANKING_MODEL and import retrieval if retrieval is actually enabled
+    if not args.no_retrieval:
+        from MLAgentBench import retrieval
+        retrieval.RANKING_MODEL = args.llm_name
+
     if args.no_retrieval or args.agent_type != "ResearchAgent":
-        # should not use these actions when there is no retrieval
         args.actions_remove_from_prompt.extend(["Retrieval from Research Log", "Append Summary to Research Log", "Reflection"])
+
     LLM.FAST_MODEL = args.fast_llm_name
+
+    print(args, file=sys.stderr)
+
     run(getattr(sys.modules[__name__], args.agent_type), args)
-    

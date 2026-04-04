@@ -6,12 +6,12 @@ from numpy.linalg import norm
 from transformers import AutoTokenizer, AutoModel
 from MLAgentBench.LLM import complete_text
 
-RANKING_MODEL = "gpt-3.5-turbo-16k"
+RANKING_MODEL = "gpt-4o-mini"
 
 class RetrievalDatabase:
     def __init__(self, dirList, model="BAAI/llm-embedder", batch_size=32) -> None:
         self.dirList = dirList
-        self.device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.model_name = model
         
         self.tokenizer = AutoTokenizer.from_pretrained(model)
@@ -30,7 +30,7 @@ class RetrievalDatabase:
         for dirname in self.dirList:
             fileList = os.listdir(dirname)
             for filename in fileList:
-                with open(f"{dirname}/{filename}") as file:
+                with open(f"{dirname}/{filename}", encoding="utf-8", errors="replace") as file:
                     self.case_bank.append(self.query_prompt + file.read())
         
         # Construct Embedding Database

@@ -13,6 +13,7 @@ pillow
 # common ml packages
 transformers>=4.43.1
 scikit-learn>=1.3.2
+tf-keras>=2.21.0
 xgboost>=2.0.1
 scipy>=1.11.3
 pandas>=2.1.1
@@ -23,10 +24,13 @@ kaggle>=1.5.16
 # llm
 openai>=1.17.1
 anthropic>=0.5.0
+tiktoken>=0.6.0
 langchain>=0.1.16
 sentencepiece>=0.1.99
 nltk>=3.8.1
 accelerate>=0.25.0
 
-#others
+# others
 dacite>=1.8.1
+python-dotenv>=1.0.0
+pyreadline3>=3.4.1

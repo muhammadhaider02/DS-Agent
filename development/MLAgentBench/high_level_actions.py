@@ -182,7 +182,7 @@ def summary_progress(file_name, work_dir=".", **kwargs):
         return completion
 
 
-EDIT_SCRIPT_MODEL = "claude-v1"
+EDIT_SCRIPT_MODEL = "gpt-4o-mini"
 EDIT_SCRIPT_MAX_TOKENS = 4000
 def edit_script(script_name, edit_instruction, save_name, work_dir = ".", **kwargs):
     #TODO: handle long file editing
@@ -246,9 +246,10 @@ Now please edit this script according to the following instructions:
 {plan}
 ```
 Note that you should provide the **full** code after the edit, making no other changes. Please ensure the completeness of the codes so that it can be run without additional modifications. Your codes will be executed with the support of a NVIDIA GPU card with 24 GB memory. 
+IMPORTANT: Do NOT import AdamW from transformers (it was removed). Use `from torch.optim import AdamW` instead.
 Please response exactly in the following format:
 ```python
-Here is the python code.
+# Your complete Python code goes here
 ```
 """
         else:

@@ -3,41 +3,45 @@
 import os
 from functools import partial
 import tiktoken
+from dotenv import load_dotenv
 from .schema import TooLongPromptError, LLMError
+
+load_dotenv()
 
 enc = tiktoken.get_encoding("cl100k_base")
 STATISTICAL_DIR = None
 FINETUNE_STEP = 0
 
-try:
-    from helm.common.authentication import Authentication
-    from helm.common.request import Request, RequestResult
-    from helm.proxy.accounts import Account
-    from helm.proxy.services.remote_service import RemoteService
-    # setup CRFM API
-    auth = Authentication(api_key=open("crfm_api_key.txt").read().strip())
-    service = RemoteService("https://crfm-models.stanford.edu")
-    account: Account = service.get_account(auth)
-except Exception as e:
-    print(e)
-    print("Could not load CRFM API key crfm_api_key.txt.")
+os.environ["HF_TOKEN"] = os.getenv("HF_TOKEN", "")
 
 try:   
     import anthropic
-    # setup anthropic API key
-    anthropic_client = anthropic.Anthropic(api_key=open("claude_api_key.txt").read().strip())
+    claude_key = os.getenv("CLAUDE_API_KEY")
+    if not claude_key:
+        raise ValueError("No API key found. Set CLAUDE_API_KEY in .env")
+    anthropic_client = anthropic.Anthropic(api_key=claude_key)
 except Exception as e:
     print(e)
-    print("Could not load anthropic API key claude_api_key.txt.")
+    print("Could not load Anthropic API key.")
     
 try:
     import openai
-    # setup OpenAI API key
-    openai.api_key = "FILL IN YOUR KEY HERE."
-    os.environ["OPENAI_API_KEY"] = openai.api_key 
+    github_token = os.getenv("GITHUB_OPENAI_API_KEY")
+    openai_key = os.getenv("OPENAI_API_KEY")
+
+    if github_token:
+        client = openai.OpenAI(
+            api_key=github_token,
+            base_url="https://models.inference.ai.azure.com"
+        )
+    elif openai_key:
+        client = openai.OpenAI(api_key=openai_key)
+    else:
+        raise ValueError("No API key found. Set GITHUB_OPENAI_API_KEY or OPENAI_API_KEY in .env")
+
 except Exception as e:
     print(e)
-    print("Could not load OpenAI API key openai_api_key.txt.")
+    print("Could not load OpenAI API key.")
 
 
 def log_to_file(log_file, prompt, completion, model, max_tokens_to_sample):
@@ -54,7 +58,6 @@ def log_to_file(log_file, prompt, completion, model, max_tokens_to_sample):
         f.write(f"Number of sampled tokens: {num_sample_tokens}\n")
         f.write("\n\n")
     
-    # Logging for finetuning
     finetune_directory = os.path.join(STATISTICAL_DIR, "finetune_log")
     if not os.path.exists(finetune_directory):
         os.mkdir(finetune_directory)
@@ -66,9 +69,8 @@ def log_to_file(log_file, prompt, completion, model, max_tokens_to_sample):
         f.write(completion)
 
 
-def complete_text_claude(prompt, stop_sequences=[anthropic.HUMAN_PROMPT], model="claude-v1", max_tokens_to_sample = 2000, temperature=0.5, log_file=None, **kwargs):
+def complete_text_claude(prompt, stop_sequences=[anthropic.HUMAN_PROMPT], model="claude-v1", max_tokens_to_sample=2000, temperature=0.5, log_file=None, **kwargs):
     """ Call the Claude API to complete a prompt."""
-
     ai_prompt = anthropic.AI_PROMPT
     if "ai_prompt" in kwargs is not None:
         ai_prompt = kwargs["ai_prompt"]
@@ -94,81 +96,30 @@ def complete_text_claude(prompt, stop_sequences=[anthropic.HUMAN_PROMPT], model=
     return completion
 
 
-def get_embedding_crfm(text, model="openai/gpt-4-0314"):
-    request = Request(model="openai/text-similarity-ada-001", prompt=text, embedding=True)
-    request_result: RequestResult = service.make_request(auth, request)
-    return request_result.embedding 
-    
-def complete_text_crfm(prompt=None, stop_sequences = None, model="openai/gpt-4-0314",  max_tokens_to_sample=2000, temperature = 0.5, log_file=None, messages = None, **kwargs):
-    
-    random = log_file
-    if messages:
-        request = Request(
-                prompt=prompt, 
-                messages=messages,
-                model=model, 
-                stop_sequences=stop_sequences,
-                temperature = temperature,
-                max_tokens = max_tokens_to_sample,
-                random = random
-            )
-    else:
-        print("model", model)
-        print("max_tokens", max_tokens_to_sample)
-        request = Request(
-                prompt=prompt, 
-                model=model, 
-                stop_sequences=stop_sequences,
-                temperature = temperature,
-                max_tokens = max_tokens_to_sample,
-                random = random
-        )
-    
-    try:      
-        request_result: RequestResult = service.make_request(auth, request)
-    except Exception as e:
-        # probably too long prompt
-        print(e)
-        raise TooLongPromptError()
-    
-    if request_result.success == False:
-        print(request.error)
-        raise LLMError(request.error)
-    completion = request_result.completions[0].text
-    if log_file is not None:
-        log_to_file(log_file, prompt, completion, model, max_tokens_to_sample)
-    return completion
-
-
-def complete_text_openai(prompt, stop_sequences=[], model="gpt-3.5-turbo", max_tokens_to_sample=1000, temperature=0.5, log_file=None, **kwargs):
+def complete_text_openai(prompt, stop_sequences=[], model="gpt-4o-mini", max_tokens_to_sample=1000, temperature=0.5, log_file=None, **kwargs):
     """ Call the OpenAI API to complete a prompt."""
     raw_request = {
-          "model": model,
-          "temperature": temperature,
-          "max_tokens": max_tokens_to_sample,
-          "stop": stop_sequences or None,  # API doesn't like empty list
-          **kwargs
+        "model": model,
+        "temperature": temperature,
+        "max_tokens": max_tokens_to_sample,
+        "stop": stop_sequences or None,
+        **kwargs
     }
-    
+
     iteration = 0
     completion = None
     while iteration < 10:
         try:
-            if model.startswith("gpt-3.5") or model.startswith("gpt-4"):
-                messages = [{"role": "user", "content": prompt}]
-                response = openai.ChatCompletion.create(**{"messages": messages,**raw_request})
-                completion = response["choices"][0]["message"]["content"]
-            else:
-                response = openai.Completion.create(**{"prompt": prompt,**raw_request})
-                completion = response["choices"][0]["text"]
+            messages = [{"role": "user", "content": prompt}]
+            response = client.chat.completions.create(messages=messages, **raw_request)
+            completion = response.choices[0].message.content
             break
         except Exception as e:
             iteration += 1
             print(f"===== Retry: {iteration} =====")
             print(f"Error occurs when calling API: {e}")
             continue
-    
-    ## Count consumed tokens.
+
     if STATISTICAL_DIR:
         statitical_file = STATISTICAL_DIR + "/count_tokens.txt"
         try:
@@ -177,32 +128,25 @@ def complete_text_openai(prompt, stop_sequences=[], model="gpt-3.5-turbo", max_t
         except FileNotFoundError:
             current_token_count = 0
         num_prompt_tokens = len(enc.encode(f"{anthropic.HUMAN_PROMPT} {prompt} {anthropic.AI_PROMPT}"))
-        num_sample_tokens = len(enc.encode(completion))     
+        num_sample_tokens = len(enc.encode(completion))
         total_token_count = current_token_count + num_prompt_tokens + num_sample_tokens
         with open(statitical_file, 'w') as file:
             file.write(str(total_token_count))
-    
+
     if log_file is not None:
         log_to_file(log_file, prompt, completion, model, max_tokens_to_sample)
     return completion
 
+
 def complete_text(prompt, log_file, model, **kwargs):
     """ Complete text using the specified model with appropriate API. """
-    
     if model.startswith("claude"):
-        # use anthropic API
         completion = complete_text_claude(prompt, stop_sequences=[anthropic.HUMAN_PROMPT, "Observation:"], log_file=log_file, model=model, **kwargs)
-    elif "/" in model:
-        # use CRFM API since this specifies organization like "openai/..."
-        completion = complete_text_crfm(prompt, stop_sequences=["Observation:"], log_file=log_file, model=model, **kwargs)
     else:
-        # use OpenAI API
         completion = complete_text_openai(prompt, stop_sequences=["Observation:"], log_file=log_file, model=model, **kwargs)
     return completion
 
-# specify fast models for summarization etc
-FAST_MODEL = "claude-v1"
-def complete_text_fast(prompt, **kwargs):
-    return complete_text(prompt = prompt, model = FAST_MODEL, temperature =0.01, **kwargs)
-# complete_text_fast = partial(complete_text_openai, temperature= 0.01)
 
+FAST_MODEL = "gpt-4o-mini"
+def complete_text_fast(prompt, **kwargs):
+    return complete_text(prompt=prompt, model=FAST_MODEL, temperature=0.01, **kwargs)
