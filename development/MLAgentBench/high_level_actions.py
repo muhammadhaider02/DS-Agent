@@ -248,7 +248,8 @@ Now please edit this script according to the following instructions:
 Note that you should provide the **full** code after the edit, making no other changes. Please ensure the completeness of the codes so that it can be run without additional modifications. Your codes will be executed on a **Linux machine** with a NVIDIA GPU card (~14.5GB usable VRAM).
 IMPORTANT: Do NOT import AdamW from transformers (it was removed). Use `from torch.optim import AdamW` instead.
 IMPORTANT: Do NOT use `mean_squared_error(..., squared=False)` — the `squared` parameter was removed in scikit-learn 1.6. Use `np.sqrt(mean_squared_error(...))` instead.
-IMPORTANT: To avoid CUDA out-of-memory errors, use small batch sizes (4–8) and gradient accumulation. Do NOT use batch sizes larger than 16 with transformer models.
+IMPORTANT: To avoid CUDA out-of-memory errors, use small batch sizes (4 to 8) and gradient accumulation. Do NOT use batch sizes larger than 16 with transformer models.
+IMPORTANT: To prevent NaN losses and training instability, always use gradient clipping (`torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)`), a small learning rate (1e-5 to 3e-5 for transformers), and do NOT use FP16/mixed precision unless you are certain of numerical stability.
 Please response exactly in the following format:
 ```python
 # Your complete Python code goes here
@@ -272,7 +273,7 @@ However, there are some bugs in this version. Here is the execution log:
 ```log
 {observation}
 ```
-Please revise the script to fix these bugs. Note that you should provide the **full** code after the edit, making no other changes. Please ensure the completeness of the codes so that it can be run without additional modifications. Your codes will be executed with the support of a NVIDIA GPU card with 24 GB memory. 
+Please revise the script to fix these bugs. Note that you should provide the **full** code after the edit, making no other changes. Please ensure the completeness of the codes so that it can be run without additional modifications. Your codes will be executed on a **Linux machine** with a NVIDIA GPU card (~14.5GB usable VRAM). 
 Please response exactly in the following format:
 ```reflection
 What leads to error or exception on the last modification version? How to fix it?
