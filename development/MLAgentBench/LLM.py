@@ -24,6 +24,7 @@ except Exception as e:
     print(e)
     print("Could not load Anthropic API key.")
     
+client = None  # Will be set if OpenAI/GitHub key is available
 try:
     import openai
     github_token = os.getenv("GITHUB_OPENAI_API_KEY")
