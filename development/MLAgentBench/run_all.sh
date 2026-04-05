@@ -5,7 +5,7 @@
 # Recommended: nohup ./run_all.sh > benchmark_output.log 2>&1 &
 # ============================================================
 
-set -e  # Exit immediately if any command fails
+# set -e removed: we don't want the whole benchmark to die if one task is killed
 
 TASKS=(
     "feedback"
