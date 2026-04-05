@@ -11,7 +11,7 @@ RANKING_MODEL = "gpt-4o-mini"
 class RetrievalDatabase:
     def __init__(self, dirList, model="BAAI/llm-embedder", batch_size=32) -> None:
         self.dirList = dirList
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cpu")  # Keep embedder on CPU to free full GPU VRAM for agent training code
         self.model_name = model
         
         self.tokenizer = AutoTokenizer.from_pretrained(model)

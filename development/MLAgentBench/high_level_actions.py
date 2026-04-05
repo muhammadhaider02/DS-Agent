@@ -245,9 +245,10 @@ Now please edit this script according to the following instructions:
 ```instruction
 {plan}
 ```
-Note that you should provide the **full** code after the edit, making no other changes. Please ensure the completeness of the codes so that it can be run without additional modifications. Your codes will be executed on a **Linux machine** with a NVIDIA GPU card (16GB VRAM).
+Note that you should provide the **full** code after the edit, making no other changes. Please ensure the completeness of the codes so that it can be run without additional modifications. Your codes will be executed on a **Linux machine** with a NVIDIA GPU card (~14.5GB usable VRAM).
 IMPORTANT: Do NOT import AdamW from transformers (it was removed). Use `from torch.optim import AdamW` instead.
 IMPORTANT: Do NOT use `mean_squared_error(..., squared=False)` — the `squared` parameter was removed in scikit-learn 1.6. Use `np.sqrt(mean_squared_error(...))` instead.
+IMPORTANT: To avoid CUDA out-of-memory errors, use small batch sizes (4–8) and gradient accumulation. Do NOT use batch sizes larger than 16 with transformer models.
 Please response exactly in the following format:
 ```python
 # Your complete Python code goes here
