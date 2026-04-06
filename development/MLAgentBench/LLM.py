@@ -126,6 +126,7 @@ def complete_text_openai(prompt, stop_sequences=[], model="gpt-4o-mini", max_tok
 
     iteration = 0
     completion = None
+    response = None
     while iteration < 10:
         try:
             messages = [{"role": "user", "content": prompt}]
@@ -138,18 +139,38 @@ def complete_text_openai(prompt, stop_sequences=[], model="gpt-4o-mini", max_tok
             print(f"Error occurs when calling API: {e}")
             continue
 
-    if STATISTICAL_DIR:
-        statitical_file = STATISTICAL_DIR + "/count_tokens.txt"
+    if STATISTICAL_DIR and completion is not None:
+        # Route to per-model token file
+        model_lower = model.lower()
+        if "reasoner" in model_lower:
+            token_file = STATISTICAL_DIR + "/count_tokens_deepseek_reasoner.txt"
+        elif "deepseek" in model_lower:
+            token_file = STATISTICAL_DIR + "/count_tokens_deepseek_chat.txt"
+        else:
+            token_file = STATISTICAL_DIR + "/count_tokens_other.txt"
+
+        # Use actual API usage counts; fall back to tiktoken if unavailable
+        if response is not None and hasattr(response, 'usage') and response.usage is not None:
+            num_prompt_tokens = response.usage.prompt_tokens
+            num_sample_tokens = response.usage.completion_tokens
+        else:
+            num_prompt_tokens = len(enc.encode(prompt))
+            num_sample_tokens = len(enc.encode(completion))
+
+        # Read existing per-model input/output counts
         try:
-            with open(statitical_file, 'r') as file:
-                current_token_count = int(file.read().strip())
-        except FileNotFoundError:
-            current_token_count = 0
-        num_prompt_tokens = len(enc.encode(f"{anthropic.HUMAN_PROMPT} {prompt} {anthropic.AI_PROMPT}"))
-        num_sample_tokens = len(enc.encode(completion))
-        total_token_count = current_token_count + num_prompt_tokens + num_sample_tokens
-        with open(statitical_file, 'w') as file:
-            file.write(str(total_token_count))
+            with open(token_file, 'r') as f:
+                lines = f.read().strip().splitlines()
+                existing_input = int(lines[0].split('=')[1])
+                existing_output = int(lines[1].split('=')[1])
+        except (FileNotFoundError, IndexError, ValueError):
+            existing_input = 0
+            existing_output = 0
+
+        # Write updated counts
+        with open(token_file, 'w') as f:
+            f.write(f"input={existing_input + num_prompt_tokens}\n")
+            f.write(f"output={existing_output + num_sample_tokens}\n")
 
     if log_file is not None:
         log_to_file(log_file, prompt, completion, model, max_tokens_to_sample)
