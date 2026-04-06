@@ -36,7 +36,7 @@ for (( round=1; round<=NUM_ROUNDS; round++ )); do
         echo "  --> Task: $task | Round $round/$NUM_ROUNDS | $(date)"
         echo "--------------------------------------------------------"
 
-        $BASE_CMD --task "$task" || true
+        timeout 18000 $BASE_CMD --task "$task" || true
 
         sleep 15
     done

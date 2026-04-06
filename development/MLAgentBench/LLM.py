@@ -129,7 +129,7 @@ def complete_text_openai(prompt, stop_sequences=[], model="gpt-4o-mini", max_tok
     while iteration < 10:
         try:
             messages = [{"role": "user", "content": prompt}]
-            response = _client.chat.completions.create(messages=messages, **raw_request)
+            response = _client.chat.completions.create(messages=messages, timeout=600, **raw_request)
             completion = response.choices[0].message.content
             break
         except Exception as e:

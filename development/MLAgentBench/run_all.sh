@@ -48,7 +48,7 @@ for (( round=1; round<=NUM_ROUNDS; round++ )); do
         echo "  --> Task: $task | Round $round/$NUM_ROUNDS | $(date)"
         echo "--------------------------------------------------------"
 
-        $BASE_CMD --task "$task"
+        timeout 18000 $BASE_CMD --task "$task"
 
         # Brief pause to clear GPU memory between runs
         sleep 15
