@@ -61,6 +61,7 @@ class Agent:
         self.prompt_tool_names = tool_names
         high_level_actions.EDIT_SCRIPT_MODEL = args.edit_script_llm_name
         high_level_actions.EDIT_SCRIPT_MAX_TOKENS = args.edit_script_llm_max_tokens
+        high_level_actions.PLAN_MODEL = args.llm_name
         self.tools_prompt = self.construct_tools_prompt(tool_names, env.action_infos)
 
         self.initial_prompt = initial_prompt.format(tools_prompt=self.tools_prompt, tool_names=self.prompt_tool_names,  task_description=env.research_problem, format_prompt="\n".join([f"{k}: {format_prompt_dict[k]}" for k in self.valid_format_entires]))       

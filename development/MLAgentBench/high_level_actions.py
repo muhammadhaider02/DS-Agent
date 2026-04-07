@@ -79,7 +79,7 @@ Please carefully reason over this relevant case and the provided research proble
 [Check]: List all plans in [Thought] and carefully check (1) whether the plan needs multiple experiment trials; (2) has been implemented in the current python code; or (3) violates the listed prohibitions above.
 [Decision]: Give a short, precise but detailed instruction summary on the final experiment plan in next single trial.
 """
-    design = complete_text(prompt, log_file=kwargs["log_file"], model=EDIT_SCRIPT_MODEL)
+    design = complete_text(prompt, log_file=kwargs["log_file"], model=PLAN_MODEL)
     return f"{design.split('[Decision]:')[1].strip()}\n"
 
 def understand_file(file_name, things_to_look_for, work_dir = ".", **kwargs):
@@ -184,6 +184,7 @@ def summary_progress(file_name, work_dir=".", **kwargs):
 
 EDIT_SCRIPT_MODEL = "gpt-4o-mini"
 EDIT_SCRIPT_MAX_TOKENS = 4000
+PLAN_MODEL = "gpt-4o-mini"  # Override via agent.py with args.llm_name
 def edit_script(script_name, edit_instruction, save_name, work_dir = ".", **kwargs):
     #TODO: handle long file editing
     try:

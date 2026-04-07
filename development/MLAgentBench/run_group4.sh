@@ -10,7 +10,7 @@ TASKS=(
     "enzyme-substrate"
 )
 
-NUM_ROUNDS=4
+NUM_ROUNDS=3
 
 BASE_CMD="python runner.py \
     --llm-name deepseek-reasoner \
