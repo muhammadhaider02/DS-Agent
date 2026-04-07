@@ -10,7 +10,7 @@ TASKS=(
     "textual-entailment"
 )
 
-NUM_ROUNDS=3
+NUM_ROUNDS=1
 
 BASE_CMD="python runner.py \
     --llm-name deepseek-reasoner \

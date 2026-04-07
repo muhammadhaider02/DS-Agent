@@ -120,9 +120,15 @@ def complete_text_openai(prompt, stop_sequences=[], model="gpt-4o-mini", max_tok
         "model": model,
         "temperature": temperature,
         "max_tokens": max_tokens_to_sample,
-        "stop": stop_sequences or None,
         **kwargs
     }
+    if model.lower() == "deepseek-reasoner":
+        # deepseek-reasoner does not support stop sequences — omit entirely
+        # Also raise max_tokens if still at default to prevent truncation before [Decision]:
+        if max_tokens_to_sample == 1000:
+            raw_request["max_tokens"] = 8000
+    else:
+        raw_request["stop"] = stop_sequences or None
 
     iteration = 0
     completion = None

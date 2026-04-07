@@ -80,7 +80,8 @@ Please carefully reason over this relevant case and the provided research proble
 [Decision]: Give a short, precise but detailed instruction summary on the final experiment plan in next single trial.
 """
     design = complete_text(prompt, log_file=kwargs["log_file"], model=PLAN_MODEL)
-    return f"{design.split('[Decision]:')[1].strip()}\n"
+    parts = design.split('[Decision]:')
+    return f"{parts[1].strip()}\n" if len(parts) > 1 else f"{design.strip()}\n"
 
 def understand_file(file_name, things_to_look_for, work_dir = ".", **kwargs):
 
