@@ -19,7 +19,7 @@ This project is built on top of the framework of MLAgentBench. First, install ML
 
 ```shell
 cd development
-pip install -e.
+pip install -e .
 ```
 
 Then, please install neccessary libraries in the requirements.
@@ -31,6 +31,7 @@ pip install -r requirements.txt
 ## Development Stage
 
 Since DS-Agent mainly utilizes DeepSeek for the experiment, please fill in the deepseek key in .env.
+
 Run DS-Agent for development tasks with the following command:
 
 ```shell
@@ -40,7 +41,7 @@ python runner.py --task feedback --llm-name deepseek-reasoner --edit-script-llm-
 
 During execution, logs and intermediate solution files will be saved in logs/ and workspace/. 
 
-To facilitate potential future research, we also release the raw data of the task-specific evaluation metric for all the development tasks with four agents across five trials in `Raw-results-dev.xlsx`. Note that 'F' denotes failed trial in the excel document.
+To facilitate potential future research, we also release the [raw data](development-results.md) of the task-specific evaluation metric for all the development tasks across five trials. Note that 'F' denotes failed trial.
 
 ## Deployment Stage
 

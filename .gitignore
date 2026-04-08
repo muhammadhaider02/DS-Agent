@@ -13,11 +13,6 @@ development/MLAgentBench/logs/
 development/MLAgentBench/workspace/
 development/MLAgentBench/finetune_log/
 deployment/codes/
-Run 1/
-Run 2/
-base_paper.txt
-better_paper.txt
-RESULTS.md
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
