@@ -3,7 +3,7 @@ attrs>=23.1.0
 numpy>=1.26.1
 opt-einsum>=3.3.0
 six>=1.16.0
-torch>=2.1.0
+torch>=2.6.0
 torchvision>=0.16.0
 transformers>=4.34.1
 
@@ -23,7 +23,6 @@ kaggle>=1.5.16
 
 # llm
 openai>=1.17.1
-anthropic>=0.5.0
 tiktoken>=0.6.0
 langchain>=0.1.16
 sentencepiece>=0.1.99
