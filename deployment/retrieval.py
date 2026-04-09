@@ -1,9 +1,6 @@
 import os
-import re
 import json
 import torch
-import numpy as np
-from numpy.linalg import norm
 from transformers import AutoTokenizer, AutoModel
 
 DEVELOPMENT_TASKS = ["feedback", "airline-reviews", "textual-entailment", "chatgpt-prompt", "ett-m2", "ili", "handwriting", "ethanol-concentration", "media-campaign-cost", "wild-blueberry-yield", "spaceship-titanic", "enzyme-substrate"]
@@ -84,6 +81,6 @@ if __name__ == '__main__':
             query = file.read()
             doc = rb.retrieve_case(query)
         ranking_dict[task] = doc
-    with open("config/similaity_ranking.json", "wt") as json_file:
+    with open("config/similarity_ranking.json", "wt") as json_file:
         json.dump(ranking_dict, json_file, indent=4)
         

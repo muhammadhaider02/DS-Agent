@@ -28,11 +28,22 @@ Then, please install neccessary libraries in the requirements.
 pip install -r requirements.txt
 ```
 
+Create a `.env` file in the project root with your DeepSeek API key (see `.env.example`):
+
+```shell
+DEEPSEEK_API_KEY=your_key_here
+```
+
 ## Development Stage
 
-Since DS-Agent mainly utilizes DeepSeek for the experiment, please fill in the deepseek key in .env.
+Run all DS-Agent development tasks with the benchmark runner:
 
-Run DS-Agent for development tasks with the following command:
+```shell
+cd development/MLAgentBench
+bash run_all.sh
+```
+
+Alternatively, to run a single specific task:
 
 ```shell
 cd development/MLAgentBench
@@ -49,18 +60,19 @@ Run DS-Agent for deployment tasks with the provided command:
 
 ```shell
 cd deployment
-bash code_generation.sh
-bash code_evaluation.sh
+bash run_v3.sh
+bash run_r1.sh
 ```
 
-For open-sourced LLM, i.e., mixtral-8x7b-Instruct-v0.1 in this paper, we utilize the vllm framework. First, enable the LLMs serverd with
+Alternatively, to run a single specific task:
 
 ```shell
 cd deployment
-bash start_api.sh
+python generate.py --llm deepseek-reasoner --task smoker-status --shot 1 --retrieval
+python evaluation.py --path deepseek-reasoner_True_1 --task smoker-status --device 0
 ```
 
-Then, run the script shell and replace the configuration --llm by mixtral.
+During execution, results are saved per-task in `results/` and token usage is logged in `token_logs/`.
 
 ## Frequently Asked Questions
 
