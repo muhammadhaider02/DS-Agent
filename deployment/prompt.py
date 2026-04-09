@@ -1,8 +1,8 @@
 import json
 import random
 
-RP_PATH   = "./benchmarks/{}/scripts/research_problem.txt"
-PYTHON_PATH = "./benchmarks/{}/env/train.py"
+RP_PATH     = "../development/MLAgentBench/benchmarks/{}/scripts/research_problem.txt"
+PYTHON_PATH = "../development/MLAgentBench/benchmarks/{}/env/train.py"
 CASE_PATH   = "./experience_replay/{}.py"
 
 
