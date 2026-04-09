@@ -7,7 +7,7 @@ from torch.utils.data import TensorDataset, DataLoader
 from submission import submit_predictions_for_test_set
 from dataset import get_dataset
 
-from torch.cuda.amp import autocast, GradScaler
+from torch.amp import autocast, GradScaler
 
 SEED = 42
 random.seed(SEED)
@@ -22,6 +22,7 @@ HIDDEN_DIM = 32
 NUM_LAYERS = 3
 BATCH_SIZE = 64
 EPOCHS = 10
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -67,7 +68,7 @@ class BiLSTM(nn.Module):
 def train_model(model, X_train, y_train, X_valid, y_valid):
     criterion = nn.L1Loss() # Change loss function to Mean Absolute Error (MAE)
     optimizer = optim.Adam(model.parameters(), lr=0.001)
-    scaler = GradScaler()
+    scaler = GradScaler('cuda')
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.1)
     
     train_data = TensorDataset(torch.tensor(X_train).float(), torch.tensor(y_train).float())
@@ -82,7 +83,7 @@ def train_model(model, X_train, y_train, X_valid, y_valid):
             X, y = X.to(device), y.to(device)
             optimizer.zero_grad()
             
-            with autocast():
+            with autocast('cuda'):
                 output = model(X)
                 loss = criterion(output, y)
             

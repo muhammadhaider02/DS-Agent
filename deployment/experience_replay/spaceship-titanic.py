@@ -17,7 +17,6 @@ random.seed(SEED)
 torch.manual_seed(SEED)
 np.random.seed(SEED)
 
-
 def compute_metrics_for_classification(y_test, y_test_pred):
     accuracy = accuracy_score(y_test, y_test_pred)
     return accuracy

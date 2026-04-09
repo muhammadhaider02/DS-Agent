@@ -1,4 +1,5 @@
 import os
+import time
 import shutil
 import argparse
 import pandas as pd
@@ -98,6 +99,7 @@ if __name__ == '__main__':
                 device=args.device,
                 timeout=args.timeout,
             )
+            time.sleep(3)
 
             if pattern in log:
                 if is_dual_metric:

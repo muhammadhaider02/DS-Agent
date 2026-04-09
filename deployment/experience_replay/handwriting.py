@@ -26,6 +26,7 @@ EPOCHS = 10
 LEARNING_RATE = 0.001
 WINDOW_SIZE = 30
 
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def compute_metrics_for_time_series_classification(y_true, y_pred):

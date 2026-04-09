@@ -8,6 +8,7 @@ from torch.utils.data import Dataset, DataLoader
 from sklearn.model_selection import train_test_split
 from transformers import AutoTokenizer, AutoModel
 from torch.optim import AdamW
+
 from submission import submit_predictions_for_test_set
 
 SEED = 42
@@ -151,57 +152,50 @@ class DebertaLargeForTextualEntailmentMean(nn.Module):
 
 
 class EnsembleModel:
-    def __init__(self, model1, model2, tokenizer, weight1=0.5, averaging_method='logits'):
+    def __init__(self, model1, model2, tokenizer1, tokenizer2, weight1=0.5, averaging_method='logits'):
         self.model1 = model1
         self.model2 = model2
-        self.tokenizer = tokenizer
+        self.tokenizer1 = tokenizer1
+        self.tokenizer2 = tokenizer2
         self.weight1 = weight1
         self.weight2 = 1.0 - weight1
         self.averaging_method = averaging_method
-        
-        # Ensure models are in eval mode and on correct device
         self.model1.eval()
         self.model2.eval()
         self.model1.to(device)
         self.model2.to(device)
-        
-    def predict(self, X):
-        self.model1.eval()
-        self.model2.eval()
-        predictions = []
-        
-        # Create dataset
+
+    def _get_logits(self, model, tokenizer, X):
         dataset = TextualEntailmentDataset(
-            X[:, 0], X[:, 1], None, self.tokenizer, max_length=128
+            X[:, 0], X[:, 1], None, tokenizer, max_length=128
         )
         dataloader = DataLoader(dataset, batch_size=8, shuffle=False)
-        
+        all_logits = []
+        model.eval()
         with torch.no_grad():
             for batch in dataloader:
                 input_ids = batch['input_ids'].to(device)
                 attention_mask = batch['attention_mask'].to(device)
-                
-                # Get logits from both models
-                logits1 = self.model1(input_ids, attention_mask)
-                logits2 = self.model2(input_ids, attention_mask)
-                
-                if self.averaging_method == 'logits':
-                    # Weighted averaging of logits
-                    weighted_logits = self.weight1 * logits1 + self.weight2 * logits2
-                    preds = torch.argmax(weighted_logits, dim=1)
-                elif self.averaging_method == 'probabilities':
-                    # Convert logits to probabilities using softmax
-                    probs1 = torch.softmax(logits1, dim=1)
-                    probs2 = torch.softmax(logits2, dim=1)
-                    # Weighted averaging of probabilities
-                    weighted_probs = self.weight1 * probs1 + self.weight2 * probs2
-                    preds = torch.argmax(weighted_probs, dim=1)
-                else:
-                    raise ValueError(f"Unknown averaging method: {self.averaging_method}")
-                
-                predictions.extend(preds.cpu().numpy())
-        
-        return np.array(predictions)
+                logits = model(input_ids, attention_mask)
+                all_logits.append(logits.cpu())
+        return torch.cat(all_logits, dim=0)
+
+    def predict(self, X):
+        logits1 = self._get_logits(self.model1, self.tokenizer1, X)
+        logits2 = self._get_logits(self.model2, self.tokenizer2, X)
+
+        if self.averaging_method == 'logits':
+            weighted_logits = self.weight1 * logits1 + self.weight2 * logits2
+            preds = torch.argmax(weighted_logits, dim=1).numpy()
+        elif self.averaging_method == 'probabilities':
+            probs1 = torch.softmax(logits1, dim=1)
+            probs2 = torch.softmax(logits2, dim=1)
+            weighted_probs = self.weight1 * probs1 + self.weight2 * probs2
+            preds = torch.argmax(weighted_probs, dim=1).numpy()
+        else:
+            raise ValueError(f"Unknown averaging method: {self.averaging_method}")
+
+        return np.array(preds)
 
 
 def train_single_model(model_name, X_train, y_train, X_valid, y_valid):
@@ -291,22 +285,23 @@ def train_ensemble(X_train, y_train, X_valid, y_valid):
     print("\nTraining DeBERTa-Large model with mean pooling...")
     deberta_model, deberta_tokenizer = train_single_model('deberta_large', X_train, y_train, X_valid, y_valid)
     
-    return roberta_model, deberta_model, roberta_tokenizer
+    return roberta_model, deberta_model, roberta_tokenizer, deberta_tokenizer
 
 
-def grid_search_ensemble(roberta_model, deberta_model, tokenizer, X_valid, y_valid):
+def grid_search_ensemble(roberta_model, deberta_model, roberta_tokenizer, deberta_tokenizer, X_valid, y_valid):
     print("\nPerforming grid search for ensemble parameters...")
     
     best_acc = 0.0
     best_weight = 0.5
     best_method = 'logits'
     
-    weights = [i/10.0 for i in range(0, 11)]  # 0.0 to 1.0 in steps of 0.1
+    weights = [i/10.0 for i in range(0, 11)]
     averaging_methods = ['logits', 'probabilities']
     
     for weight in weights:
         for method in averaging_methods:
-            ensemble = EnsembleModel(roberta_model, deberta_model, tokenizer, 
+            ensemble = EnsembleModel(roberta_model, deberta_model,
+                                    roberta_tokenizer, deberta_tokenizer,
                                     weight1=weight, averaging_method=method)
             y_valid_pred = ensemble.predict(X_valid)
             acc = accuracy_score(y_valid, y_valid_pred)
@@ -323,8 +318,8 @@ def grid_search_ensemble(roberta_model, deberta_model, tokenizer, X_valid, y_val
     print(f"  Averaging method: {best_method}")
     print(f"  Validation Accuracy: {best_acc:.4f}")
     
-    # Create final ensemble with best parameters
-    best_ensemble = EnsembleModel(roberta_model, deberta_model, tokenizer,
+    best_ensemble = EnsembleModel(roberta_model, deberta_model,
+                                 roberta_tokenizer, deberta_tokenizer,
                                  weight1=best_weight, averaging_method=best_method)
     
     return best_ensemble, best_weight, best_method, best_acc
@@ -345,11 +340,11 @@ if __name__ == '__main__':
     X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=0.10, random_state=SEED)
 
     # Train individual models
-    roberta_model, deberta_model, tokenizer = train_ensemble(X_train, y_train, X_valid, y_valid)
+    roberta_model, deberta_model, roberta_tokenizer, deberta_tokenizer = train_ensemble(X_train, y_train, X_valid, y_valid)
 
     # Perform grid search to find best ensemble parameters
     best_ensemble, best_weight, best_method, best_acc = grid_search_ensemble(
-        roberta_model, deberta_model, tokenizer, X_valid, y_valid
+        roberta_model, deberta_model, roberta_tokenizer, deberta_tokenizer, X_valid, y_valid
     )
 
     # Submit predictions for the test set using best ensemble

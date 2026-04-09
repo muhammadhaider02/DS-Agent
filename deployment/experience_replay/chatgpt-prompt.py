@@ -9,7 +9,7 @@ import random
 
 from submission import submit_predictions_for_test_set
 
-from torch.cuda.amp import GradScaler, autocast
+from torch.amp import GradScaler, autocast
 
 SEED = 42
 LABEL_NUM = 8
@@ -22,7 +22,7 @@ np.random.seed(SEED)
 torch.manual_seed(SEED)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-scaler = GradScaler()
+scaler = GradScaler('cuda')
 
 def compute_metrics_for_classification(y_test, y_test_pred):
     acc = accuracy_score(y_test, y_test_pred) 
@@ -32,10 +32,10 @@ def train_model(dataloader, model, optimizer, scheduler):
     model.train()
     for epoch in range(EPOCHS):
         for batch in dataloader:
-            b_input_ids, b_labels = batch[0].to(device), batch[1].to(device)
+            b_input_ids, b_attention_mask, b_labels = batch[0].to(device), batch[1].to(device), batch[2].to(device)
             model.zero_grad()
-            with autocast():
-                outputs = model(b_input_ids, labels=b_labels)
+            with autocast('cuda'):
+                outputs = model(b_input_ids, attention_mask=b_attention_mask, labels=b_labels)
                 loss = outputs[0]
             scaler.scale(loss).backward()
             scaler.step(optimizer)
@@ -48,8 +48,9 @@ def predict(model, dataloader):
     predictions = []
     for batch in dataloader:
         b_input_ids = batch[0].to(device)
+        b_attention_mask = batch[1].to(device)
         with torch.no_grad():
-            outputs = model(b_input_ids)
+            outputs = model(b_input_ids, attention_mask=b_attention_mask)
         logits = outputs[0]
         logits = logits.detach().cpu().numpy()
         predictions.extend(np.argmax(logits, axis=1).flatten())
@@ -92,8 +93,16 @@ if __name__ == '__main__':
     )
 
     # create Tensor datasets
-    dataset_train = TensorDataset(encoded_data_train['input_ids'], torch.tensor(y_train))
-    dataset_valid = TensorDataset(encoded_data_valid['input_ids'], torch.tensor(y_valid))
+    dataset_train = TensorDataset(
+        encoded_data_train['input_ids'],
+        encoded_data_train['attention_mask'],
+        torch.tensor(y_train)
+    )
+    dataset_valid = TensorDataset(
+        encoded_data_valid['input_ids'],
+        encoded_data_valid['attention_mask'],
+        torch.tensor(y_valid)
+    )
 
     # create dataloaders
     dataloader_train = DataLoader(dataset_train, batch_size=BATCH_SIZE)
@@ -129,7 +138,10 @@ if __name__ == '__main__':
     )
 
     # create Tensor dataset
-    dataset_submission = TensorDataset(encoded_data_submission['input_ids'])
+    dataset_submission = TensorDataset(
+        encoded_data_submission['input_ids'],
+        encoded_data_submission['attention_mask']
+    )
 
     # create dataloader
     dataloader_submission = DataLoader(dataset_submission, batch_size=BATCH_SIZE)

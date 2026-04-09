@@ -18,7 +18,7 @@ np.random.seed(SEED)
 
 
 def compute_metrics_for_regression(y_test, y_test_pred):
-    rmlse = mean_squared_log_error(y_test, y_test_pred, squared=False)
+    rmlse = np.sqrt(mean_squared_log_error(y_test, y_test_pred))
     return rmlse
 
 def train_model(X_train, y_train, X_valid, y_valid, params):

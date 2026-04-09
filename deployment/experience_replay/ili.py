@@ -228,7 +228,7 @@ def predict(model, X):
             checkpoint_model = ResidualBiGRU().to(device)
             
             # Load checkpoint
-            checkpoint = torch.load(checkpoint_path, map_location=device)
+            checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
             checkpoint_model.load_state_dict(checkpoint['model_state_dict'])
             checkpoint_model.eval()
             

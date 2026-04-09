@@ -25,6 +25,7 @@ LEARNING_RATE = 0.01
 STEP_SIZE = 5
 GAMMA = 0.5
 
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class LSTMModel(nn.Module):
