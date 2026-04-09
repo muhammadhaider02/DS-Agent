@@ -15,14 +15,7 @@ We select 30 representative data science tasks covering three data modalities an
 
 ## Setup
 
-This project is built on top of the framework of MLAgentBench. First, install MLAgentBench package with:
-
-```shell
-cd development
-pip install -e .
-```
-
-Then, please install neccessary libraries in the requirements.
+Install neccessary libraries in the requirements.
 
 ```shell
 pip install -r requirements.txt
@@ -35,6 +28,13 @@ DEEPSEEK_API_KEY=your_key_here
 ```
 
 ## Development Stage
+
+This project is built on top of the framework of MLAgentBench. First, install MLAgentBench package with:
+
+```shell
+cd development
+pip install -e .
+```
 
 Run all DS-Agent development tasks with the benchmark runner:
 
