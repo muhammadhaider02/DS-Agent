@@ -22,8 +22,10 @@ def compute_metrics_for_regression(y_test, y_test_pred):
     return rmlse
 
 def train_model(X_train, y_train, X_valid, y_valid, params):
-    model = xgb.XGBRegressor(**params, random_state=SEED)
-    model.fit(X_train, y_train)
+    model = xgb.XGBRegressor(**params, random_state=SEED, early_stopping_rounds=50)
+    model.fit(X_train, y_train,
+              eval_set=[(X_valid, y_valid)],
+              verbose=False)
     return model
 
 def predict(model, X):
