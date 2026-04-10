@@ -1,6 +1,6 @@
 # core deep learning
 torch>=2.6.0
-torchvision>=0.16.0
+torchvision==0.21.0
 numpy>=1.26.1
 attrs>=23.1.0
 opt-einsum>=3.3.0
