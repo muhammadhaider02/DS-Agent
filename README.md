@@ -1,12 +1,12 @@
 # DS-Agent
 
-This is the official implementation of our work "DS-Agent: Automated Data Science by Empowering Large Language Models with Case-Based Reasoning" (ICML 2024). [[arXiv Version]](https://arxiv.org/abs/2402.17453) [[Download Benchmark(Google Drive)]](https://drive.google.com/file/d/1xUd1nvCsMLfe-mv9NBBHOAtuYnSMgBGx/view?usp=sharing)
+This is the official implementation of "DS-Agent: Role-Aware Hybrid LLM Assignment for Cost-Efficient Automated Data Science".
 
 ![overview.png](figures/overview.png)
 
 ## Benchmark and Dataset
 
-We select 30 representative data science tasks covering three data modalities and two fundamental ML task types. Please download the datasets and corresponding configuration files via [[Google Drive]](https://drive.google.com/file/d/1xUd1nvCsMLfe-mv9NBBHOAtuYnSMgBGx/view?usp=sharing)  here and unzip them to the directory of "development/MLAgentBench/benchmarks". Besides, we collect the human insight cases from Kaggle in development/data.zip. Please unzip it, too.
+We select 30 representative data science tasks covering three data modalities and two fundamental ML task types. Please download the datasets and corresponding configuration files via [[Google Drive]](https://drive.google.com/file/d/1xUd1nvCsMLfe-mv9NBBHOAtuYnSMgBGx/view?usp=sharing) here and unzip them to the directory of "development/MLAgentBench/benchmarks". Besides, we collect the human insight cases from Kaggle in development/data.zip. Please unzip it, too.
 
 > [!WARNING]
 > **Non-Infringement:** The pre-processed data we provide is intended exclusively for educational and research purposes. We do not claim ownership of the original data, and any use of this data must respect the rights of the original creators. Users are responsible for ensuring that their use of the data does not infringe on any copyrights or other intellectual property rights.
@@ -89,22 +89,3 @@ As such, MeanRank(A)=mean([1,3,5,7,9])=5, BestRank(A)=min([1,3,5,7,9])=1. Simila
 - `train.py`: an initial script for the custom task, with implementation of basic data loading, training and evaluation. Note that the current benchmarks use random guess as an initial training solution.
 - `prepared`: a sign file required by MLAgentBench. Just copy one from other benchmark tasks.
 - `research_problem.txt`: the task description of the custom task. You can refer to the other benchmark tasks.
-
-## Cite
-
-Please consider citing our paper if you find this work useful:
-
-```
-
-@InProceedings{DS-Agent,
-  title = 	 {{DS}-Agent: Automated Data Science by Empowering Large Language Models with Case-Based Reasoning},
-  author =       {Guo, Siyuan and Deng, Cheng and Wen, Ying and Chen, Hechang and Chang, Yi and Wang, Jun},
-  booktitle = 	 {Proceedings of the 41st International Conference on Machine Learning},
-  pages = 	 {16813--16848},
-  year = 	 {2024},
-  volume = 	 {235},
-  series = 	 {Proceedings of Machine Learning Research},
-  publisher =    {PMLR}
-}
-
-```
