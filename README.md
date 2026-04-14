@@ -1,6 +1,6 @@
 # DS-Agent
 
-This is the official implementation of "DS-Agent: Role-Aware Hybrid LLM Assignment for Cost-Efficient Automated Data Science".
+Official implementation of "DS-Agent: Role-Aware Hybrid LLM Assignment for Cost-Efficient Automated Data Science".
 
 ![overview.png](figures/overview.png)
 
