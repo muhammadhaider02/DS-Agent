@@ -11,8 +11,6 @@ development/data/
 development/MLAgentBench/benchmarks/
 development/MLAgentBench/logs/
 development/MLAgentBench/workspace/
-development/MLAgentBench/finetune_log/
-deployment/codes/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -64,9 +62,6 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
-
-# Jupyter Notebook
-.ipynb_checkpoints
 
 # VS Code / IDEs
 .vscode/

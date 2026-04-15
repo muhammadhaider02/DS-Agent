@@ -52,7 +52,7 @@ python runner.py --task feedback --llm-name deepseek-reasoner --edit-script-llm-
 
 During execution, logs and intermediate solution files will be saved in logs/ and workspace/. 
 
-To facilitate potential future research, we also release the [raw data](development-results.md) of the task-specific evaluation metric for all the development tasks across five trials. Note that 'F' denotes failed trial.
+To facilitate potential future research, we also release the [raw data](development-results.md) of the task-specific evaluation metric for all the development tasks across five trials. 
 
 ## Deployment Stage
 
