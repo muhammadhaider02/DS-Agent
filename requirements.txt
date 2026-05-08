@@ -29,6 +29,7 @@ tf-keras>=2.21.0
 openai>=1.17.1
 langchain>=0.1.16
 python-dotenv>=1.0.0
+anthropic>=0.20.0
 
 # others
 dacite>=1.8.1
