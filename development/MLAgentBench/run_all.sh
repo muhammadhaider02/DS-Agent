@@ -18,11 +18,11 @@ TASKS=(
     "ethanol-concentration"
     "media-campaign-cost"
     "wild-blueberry-yield"
-    "smoker-status"
+    "spaceship-titanic"
     "enzyme-substrate"
 )
 
-NUM_ROUNDS=1
+NUM_ROUNDS=5
 
 BASE_CMD="python runner.py \
     --llm-name deepseek-reasoner \
