@@ -15,15 +15,10 @@
 **DS-Agent with GPT-3.5 gives the plan:**
 
 > 1. Implement the missing functions for training the model and making predictions.
-> 
 > 2. Modify the code to incorporate the pooling method described in the case.
-> 
 > 3. Generate variations of the prompt question and use them as additional training data for prompt question augmentation.
-> 
 > 4. Investigate the use of auxiliary classes by incorporating target labels from external models.
-> 
 > 5. Experiment with different max lengths for training and inference to find the optimal value.
-> 
 > 6. Consider using pseudo labels by combining the original labels with pseudo labels.
 
 **Explanation:**
@@ -45,21 +40,13 @@ In this plan, DS-Agent does not explicitly give the model design but requires to
 **DS-Agent with GPT-3.5 gives the plan:**
 
 > 1. Implement a baseline model using a pre-trained language model (e.g., BERT or RoBERTa) and fine-tune it for the regression task.
-> 
 > 2. Explore different pooling methods such as mean pooling, LSTM layer pooling, and LSTM sequence pooling to capture important information from the essays.
-> 
 > 3. Augment the prompt questions by generating variations using techniques like language model-based augmentation.
-> 
 > 4. Incorporate auxiliary classes based on external models trained on similar data to provide additional information and improve the model's performance.
-> 
 > 5. Experiment with different max lengths to find the optimal length for the model. Start with a range of 896-1280 during initial training and increase it during pseudo labeling rounds if necessary.
-> 
 > 6. Consider using pseudo labels to leverage additional data and improve the model's performance. Concatenate the original labels and pseudo labels for training.
-> 
 > 7. Explore ensembling multiple models, such as deberta-v3-large, deberta-v3-base, OpenAssistant/reward-model-deberta-v3-large-v2, and deberta-large, to further enhance the performance.
-> 
 > 8. Evaluate the models using the MCRMSE metric and compare the results with the baseline model.
-> 
 > 9. Submit predictions for the test set using the best-performing model.
 
 **Explanation:**
