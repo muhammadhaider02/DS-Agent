@@ -1,4 +1,4 @@
-# DS-Agent | Development Stage Results
+# DS-Agent: Development Stage Results
 
 This document consolidates all benchmark results from the **Development Stage** of DS-Agent across multiple model configurations. Each task is evaluated over **5 trials**. Failures (F) are assigned the worst rank during ranking.
 
@@ -40,3 +40,67 @@ Best rank = rank of the single best run out of 15 combined. Lower is better.
 | **DeepSeek-V3** | 7 | 6 | 3 | 6 | 2 | 4 | 2 | 9 | 7 | 8 | 8 | 4 | **5.50** |
 | **GPT-4** | 2 | 5 | 8 | 3 | 1 | 3 | 7 | 1 | 1 | 1 | 4 | 1 | **3.08** |
 | **Hybrid (R1+V3)** | 1 | 1 | 1 | 1 | 8 | 1 | 1 | 4 | 2 | 3 | 1 | 5 | **2.42** |
+
+## Token Usage: Hybrid (DeepSeek-R1 Planner + DeepSeek-V3 elsewhere)
+
+Cumulative token consumption per task across all 5 trials. Counts are taken from the
+DeepSeek API `usage` fields, split by model.
+
+| Task | V3 Input | V3 Output | R1 Input | R1 Output | Cost (USD) |
+|:-----|---------:|----------:|---------:|----------:|-----------:|
+| FB  | 92,370 | 45,132 | 12,505 | 10,464 | $0.1044 |
+| AR  | 61,731 | 22,666 | 18,561 | 13,564 | $0.0815 |
+| TE  | 50,139 | 15,680 | 16,643 | 14,035 | $0.0707 |
+| CP  | 79,553 | 27,834 | 16,191 | 14,999 | $0.0938 |
+| ETT | 48,915 | 18,205 | 14,043 | 15,204 | $0.0743 |
+| ILI | 53,912 | 17,801 | 20,266 | 19,346 | $0.0877 |
+| HW  | 48,194 | 11,659 | 15,431 | 12,793 | $0.0623 |
+| EC  | 45,319 | 15,369 | 18,997 | 14,203 | $0.0707 |
+| MCS | 64,216 | 18,725 | 16,659 | 19,492 | $0.0898 |
+| WBY | 42,371 |  8,595 | 13,085 | 14,655 | $0.0602 |
+| ST  | 35,763 |  4,902 | 10,254 | 18,060 | $0.0602 |
+| ES  | 54,994 | 18,107 | 14,505 | 21,912 | $0.0907 |
+| **Total** | **677,477** | **224,675** | **187,140** | **188,727** | **$0.9463** |
+
+## Token Usage: DeepSeek-V3 (Uniform)
+
+Cumulative token consumption per task across all 5 trials, DeepSeek-V3 in every role.
+
+| Task | V3 Input | V3 Output | Cost (USD) |
+|:-----|---------:|----------:|-----------:|
+| FB  | 96,651 | 41,436 | $0.0717 |
+| AR  | 85,518 | 29,067 | $0.0551 |
+| TE  | 93,790 | 34,623 | $0.0634 |
+| CP  | 66,871 | 20,064 | $0.0401 |
+| ETT | 54,418 | 14,333 | $0.0305 |
+| ILI | 98,187 | 26,557 | $0.0557 |
+| HW  | 54,564 | 14,308 | $0.0305 |
+| EC  | 71,088 | 18,265 | $0.0393 |
+| MCS | 83,370 | 22,546 | $0.0473 |
+| WBY | 74,278 | 21,287 | $0.0435 |
+| ST  | 44,439 |  8,278 | $0.0211 |
+| ES  | 77,684 | 21,840 | $0.0450 |
+| **Total** | **900,858** | **272,604** | **$0.5431** |
+
+## Cost and Token Summary
+
+Each configuration was run over 60 development runs (12 tasks × 5 trials). Per-run values
+are derived from the exact totals above.
+
+| Configuration | Total Tokens | Tokens / Run | Cost / Run | Total Cost |
+|:--------------|-------------:|-------------:|-----------:|-----------:|
+| Hybrid (R1+V3) | 1,278,019 | 21,300 | $0.0158 | $0.9463 |
+| DeepSeek-V3 (uniform) | 1,173,462 | 19,558 | $0.0091 | $0.5431 |
+| GPT-4 | *not measured* | *not measured* | $1.6000 | — |
+
+GPT-4 cost is the per-run development figure from Table 4 of Guo et al. (ICML 2024). GPT-4
+was never run in this study, so no token counts exist for it.
+
+## Pricing Reference
+
+Rates current at the time of experimentation.
+
+| Model | Input | Output |
+|:------|------:|-------:|
+| DeepSeek-V3 (`deepseek-chat`) | $0.27 / 1M tokens | $1.10 / 1M tokens |
+| DeepSeek-R1 (`deepseek-reasoner`) | $0.55 / 1M tokens | $2.19 / 1M tokens |
