@@ -27,6 +27,8 @@ Create a `.env` file in the project root with your DeepSeek API key (see `.env.e
 DEEPSEEK_API_KEY=your_key_here
 ```
 
+The reported experiments were run on an AWS EC2 `g4dn.xlarge` instance (Deep Learning OSS Nvidia Driver AMI, PyTorch 2.5.1, Ubuntu 22.04). See [Setup Guide](development/aws-ec2-setup.md) for the full instance setup, data upload, benchmark execution and result retrieval steps.
+
 ## Development Stage
 
 This project is built on top of the framework of MLAgentBench. First, install MLAgentBench package with:
